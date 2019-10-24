@@ -70,26 +70,22 @@ func unmarshalXY(data []byte) (x *big.Int, y *big.Int) {
 	return
 }
 
-// decompressPoints using formula y^2 = x^3 + ax + b mod p
+// decompressPoints using formula y² = x³ - 3x + b
+// crypto/elliptic/elliptic.go:55
 func decompressPoints(x *big.Int, yBit uint) (*big.Int, *big.Int) {
 	params := curve.Params()
 
-	// x^3 mod P
-	x3 := new(big.Int).Exp(x, new(big.Int).SetInt64(3), params.P)
+	x3 := new(big.Int).Mul(x, x)
+	x3.Mul(x3, x)
 
-	// a * x mod P
-	ax := new(big.Int).Mul(x, new(big.Int).SetInt64(-3))
-	ax.Mod(ax, params.P)
+	threeX := new(big.Int).Lsh(x, 1)
+	threeX.Add(threeX, x)
 
-	// x^3 + a * x mod P
-	x3.Add(x3, ax)
-	x3.Mod(x3, params.P)
-
-	// x^3 + a * x + b mod P
+	x3.Sub(x3, threeX)
 	x3.Add(x3, params.B)
 	x3.Mod(x3, params.P)
 
-	// y = sqrt(x^3 + ax + b mod p) mod P
+	// y = √(x³ - 3x + b) mod p
 	y := new(big.Int).ModSqrt(x3, params.P)
 
 	// big.Int.Jacobi(a, b) can return nil
