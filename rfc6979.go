@@ -21,6 +21,12 @@ const (
 	ErrWrongSignature = internal.Error("wrong signature")
 )
 
+// hashBytesRFC6979 returns the sha256 sum.
+func hashBytesRFC6979(data []byte) []byte {
+	sign := sha256.Sum256(data)
+	return sign[:]
+}
+
 // SignRFC6979 signs an arbitrary length hash (which should be the result of
 // hashing a larger message) using the private key. It returns the
 // signature as a pair of integers.
@@ -28,7 +34,7 @@ const (
 // Note that FIPS 186-3 section 4.6 specifies that the hash should be truncated
 // to the byte-length of the subgroup. This function does not perform that.
 func SignRFC6979(key *ecdsa.PrivateKey, msg []byte) ([]byte, error) {
-	r, s, err := rfc6979.SignECDSA(key, hashBytes(msg), sha256.New)
+	r, s, err := rfc6979.SignECDSA(key, hashBytesRFC6979(msg), sha256.New)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +55,7 @@ func decodeSignature(sig []byte) (*big.Int, *big.Int, error) {
 func VerifyRFC6979(key *ecdsa.PublicKey, sig, msg []byte) error {
 	if r, s, err := decodeSignature(sig); err != nil {
 		return err
-	} else if !ecdsa.Verify(key, hashBytes(msg), r, s) {
+	} else if !ecdsa.Verify(key, hashBytesRFC6979(msg), r, s) {
 		return ErrWrongSignature
 	}
 
