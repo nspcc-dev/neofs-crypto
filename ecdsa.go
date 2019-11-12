@@ -4,7 +4,7 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
-	"crypto/sha256"
+	"crypto/sha512"
 	"crypto/x509"
 	"math/big"
 
@@ -183,9 +183,9 @@ func MarshalPrivateKey(key *ecdsa.PrivateKey) []byte {
 	return key.D.Bytes()
 }
 
-// hashBytes returns the sha256 sum.
+// hashBytes returns the sha512 sum.
 func hashBytes(data []byte) []byte {
-	buf := sha256.Sum256(data)
+	buf := sha512.Sum512(data)
 	return buf[:]
 }
 
@@ -203,7 +203,7 @@ func Verify(pub *ecdsa.PublicKey, msg, sig []byte) error {
 	return nil
 }
 
-// Sign signs a message using the private key. If the sha256 hash of msg
+// Sign signs a message using the private key. If the sha512 hash of msg
 // is longer than the bit-length of the private key's curve order, the hash
 // will be truncated to that length. It returns the signature as slice bytes.
 // The security of the private key depends on the entropy of rand.
