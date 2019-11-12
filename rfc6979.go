@@ -46,7 +46,7 @@ func decodeSignature(sig []byte) (*big.Int, *big.Int, error) {
 
 // VerifyRFC6979 verifies the signature of msg using the public key. It
 // return nil only if signature is valid.
-func VerifyRFC6979(key *ecdsa.PublicKey, sig, msg []byte) error {
+func VerifyRFC6979(key *ecdsa.PublicKey, msg, sig []byte) error {
 	if r, s, err := decodeSignature(sig); err != nil {
 		return err
 	} else if !ecdsa.Verify(key, hashBytes(msg), r, s) {

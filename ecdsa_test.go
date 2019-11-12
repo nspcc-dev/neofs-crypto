@@ -112,13 +112,13 @@ func TestSignVerify(t *testing.T) {
 				r1, s1, err := ecdsa.Sign(rand.Reader, key, hashBytes(data))
 				require.NoError(t, err)
 
-				hash := marshalXY(r1, s1)
-				UnmarshalPublicKey(hash)
+				sign := marshalXY(r1, s1)
+				UnmarshalPublicKey(sign)
 			}
 
 			{ // 3. bad big.Ints
-				hash := marshalXY(big.NewInt(0), big.NewInt(1))
-				UnmarshalPublicKey(hash)
+				sign := marshalXY(big.NewInt(0), big.NewInt(1))
+				UnmarshalPublicKey(sign)
 			}
 		})
 	})
@@ -134,20 +134,20 @@ func TestSignVerify(t *testing.T) {
 			hashBytes(data))
 		require.NoError(t, err)
 
-		hash := marshalXY(r1, s1)
+		sign := marshalXY(r1, s1)
 
-		{ // This is just to validate, that we are on right way.. try to unmarshal R/S from hash
+		{ // This is just to validate, that we are on right way.. try to unmarshal R/S from sign
 			// validate bytes length
 			byteLen := (curve.Params().BitSize + 7) >> 3
-			require.Len(t, hash, 1+2*byteLen)
+			require.Len(t, sign, 1+2*byteLen)
 
 			// uncompressed form?
-			require.Equal(t, byte(4), hash[0])
+			require.Equal(t, byte(4), sign[0])
 
 			// validate R / S
 			p := curve.Params().P
-			r := new(big.Int).SetBytes(hash[1 : 1+byteLen])
-			s := new(big.Int).SetBytes(hash[1+byteLen:])
+			r := new(big.Int).SetBytes(sign[1 : 1+byteLen])
+			s := new(big.Int).SetBytes(sign[1+byteLen:])
 			require.True(t, r.Cmp(p) < 0)
 			require.True(t, s.Cmp(p) < 0)
 
@@ -155,7 +155,7 @@ func TestSignVerify(t *testing.T) {
 			// require.True(t, curve.IsOnCurve(r, s))
 		}
 
-		r2, s2 := unmarshalXY(hash)
+		r2, s2 := unmarshalXY(sign)
 		require.NotNil(t, r2)
 		require.NotNil(t, s2)
 
@@ -169,11 +169,11 @@ func TestSignVerify(t *testing.T) {
 			key  = test.DecodeKey(0)
 		)
 
-		hash, err := Sign(key, data)
+		sign, err := Sign(key, data)
 		require.NoError(t, err)
 
 		for i := 0; i < 100; i++ {
-			require.NoError(t, Verify(&key.PublicKey, hash, data))
+			require.NoError(t, Verify(&key.PublicKey, data, sign))
 		}
 	})
 }
