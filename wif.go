@@ -21,7 +21,7 @@ const (
 	// by last 4 bytes signature.
 	ErrBadChecksum = internal.Error("bad checksum")
 
-	// ErrEmptyPrivateKey when PK passed into WIFEncode method is nil
+	// ErrEmptyPrivateKey when PK passed into WIFEncode method is nil.
 	ErrEmptyPrivateKey = internal.Error("empty private key")
 )
 

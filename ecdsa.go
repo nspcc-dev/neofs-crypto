@@ -13,10 +13,10 @@ import (
 )
 
 const (
-	// ErrEmptyPublicKey when PK passed to Verify method is nil
+	// ErrEmptyPublicKey when PK passed to Verify method is nil.
 	ErrEmptyPublicKey = internal.Error("empty public key")
 
-	// ErrInvalidSignature when signature passed to Verify method is mismatch
+	// ErrInvalidSignature when signature passed to Verify method is mismatch.
 	ErrInvalidSignature = internal.Error("invalid signature")
 
 	// ErrCannotUnmarshal when signature ([]byte) passed to Verify method has wrong format
@@ -32,11 +32,11 @@ const (
 
 	// PublicKeyUncompressedSize is constant with uncompressed size of public key (PK).
 	// First byte always should be 0x4 other 64 bytes is X and Y (32 bytes per coordinate).
-	// 2 * 32 + 1.
+	// 2 * 32 + 1
 	PublicKeyUncompressedSize = 65
 )
 
-// P256 is base elliptic curve
+// P256 is base elliptic curve.
 var curve = elliptic.P256()
 
 // Marshal converts a points into the uncompressed form specified in section 4.3.6 of ANSI X9.62.
@@ -50,7 +50,7 @@ func marshalXY(x, y *big.Int) []byte {
 // Unlike the original version of the code, we ignore that x or y not on the curve
 // --------------
 // It's copy-paste elliptic.Unmarshal(curve, data) stdlib function, without last line
-// of code 🤔
+// of code.
 // Link - https://golang.org/pkg/crypto/elliptic/#Unmarshal
 func unmarshalXY(data []byte) (x *big.Int, y *big.Int) {
 	if len(data) != PublicKeyUncompressedSize {
@@ -138,7 +138,7 @@ func decodePoint(data []byte) (*big.Int, *big.Int) {
 	return nil, nil
 }
 
-// MarshalPublicKey to bytes
+// MarshalPublicKey to bytes.
 func MarshalPublicKey(key *ecdsa.PublicKey) []byte {
 	if key == nil || key.X == nil || key.Y == nil {
 		return nil
@@ -147,7 +147,7 @@ func MarshalPublicKey(key *ecdsa.PublicKey) []byte {
 	return encodePoint(key.X, key.Y)
 }
 
-// UnmarshalPublicKey from bytes
+// UnmarshalPublicKey from bytes.
 func UnmarshalPublicKey(data []byte) *ecdsa.PublicKey {
 	if x, y := decodePoint(data); x != nil && y != nil && curve.IsOnCurve(x, y) {
 		return &ecdsa.PublicKey{
@@ -160,8 +160,9 @@ func UnmarshalPublicKey(data []byte) *ecdsa.PublicKey {
 	return nil
 }
 
-// UnmarshalPrivateKey method to parse SK from bytes.
-// It is similar to `ecdsa.Generate()` but uses pre-defined big.Int and curve for NEO Blockchain
+// UnmarshalPrivateKey from bytes.
+// It is similar to `ecdsa.Generate()` but uses pre-defined big.Int and
+// curve for NEO Blockchain (elliptic.P256)
 // Link - https://golang.org/pkg/crypto/ecdsa/#GenerateKey
 func UnmarshalPrivateKey(data []byte) (*ecdsa.PrivateKey, error) {
 	if len(data) == PrivateKeyCompressedSize { // todo: consider using only NEO blockchain private keys
@@ -177,7 +178,7 @@ func UnmarshalPrivateKey(data []byte) (*ecdsa.PrivateKey, error) {
 	return x509.ParseECPrivateKey(data)
 }
 
-// MarshalPrivateKey to bytes
+// MarshalPrivateKey to bytes.
 func MarshalPrivateKey(key *ecdsa.PrivateKey) []byte {
 	return key.D.Bytes()
 }
@@ -188,27 +189,26 @@ func hashBytes(data []byte) []byte {
 	return buf[:]
 }
 
-// Verify verifies the signature in r, s of hash using the public key, pub. Its
-// return value records whether the signature is valid.
-func Verify(pub *ecdsa.PublicKey, hash, data []byte) error {
-	if r, s := unmarshalXY(hash); r == nil || s == nil {
-		// panic("could not unmarshal r / s")
+// Verify verifies the signature of msg using the public key pub. It returns
+// nil only if signature is valid.
+func Verify(pub *ecdsa.PublicKey, sig, msg []byte) error {
+	if r, s := unmarshalXY(sig); r == nil || s == nil {
 		return ErrCannotUnmarshal
 	} else if pub == nil {
 		return ErrEmptyPublicKey
-	} else if !ecdsa.Verify(pub, hashBytes(data), r, s) {
+	} else if !ecdsa.Verify(pub, hashBytes(msg), r, s) {
 		return errors.Wrapf(ErrInvalidSignature, "%0x : %0x", r, s)
 	}
 
 	return nil
 }
 
-// Sign signs a data using the private key. If the data is longer than
-// the bit-length of the private key's curve order, the hash will be
-// truncated to that length. It returns the signature as slice bytes.
+// Sign signs a message using the private key. If the sha256 hash of msg
+// is longer than the bit-length of the private key's curve order, the hash
+// will be truncated to that length. It returns the signature as slice bytes.
 // The security of the private key depends on the entropy of rand.
-func Sign(key *ecdsa.PrivateKey, data []byte) ([]byte, error) {
-	x, y, err := ecdsa.Sign(rand.Reader, key, hashBytes(data))
+func Sign(key *ecdsa.PrivateKey, msg []byte) ([]byte, error) {
+	x, y, err := ecdsa.Sign(rand.Reader, key, hashBytes(msg))
 	if err != nil {
 		return nil, err
 	}
