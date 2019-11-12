@@ -67,7 +67,7 @@ func TestRFC6979(t *testing.T) {
 
 			require.Equal(t, sig, res, "step: %d, %02x", i, res)
 
-			require.NoErrorf(t, VerifyRFC6979(pub, sig, body), "step: %d", i)
+			require.NoErrorf(t, VerifyRFC6979(pub, body, sig), "step: %d", i)
 			offset += RFC6979SignatureSize
 		}
 
@@ -77,7 +77,7 @@ func TestRFC6979(t *testing.T) {
 			// It's not equals in Python and Go:
 			// require.Equal(t, sig, res, "step: %d, %02x", i, res)
 
-			require.NoErrorf(t, VerifyRFC6979(pub, sig, body), "step: %d", i)
+			require.NoErrorf(t, VerifyRFC6979(pub, body, sig), "step: %d", i)
 
 			offset += RFC6979SignatureSize
 		}

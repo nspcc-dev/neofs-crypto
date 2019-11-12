@@ -191,7 +191,7 @@ func hashBytes(data []byte) []byte {
 
 // Verify verifies the signature of msg using the public key pub. It returns
 // nil only if signature is valid.
-func Verify(pub *ecdsa.PublicKey, sig, msg []byte) error {
+func Verify(pub *ecdsa.PublicKey, msg, sig []byte) error {
 	if r, s := unmarshalXY(sig); r == nil || s == nil {
 		return ErrCannotUnmarshal
 	} else if pub == nil {
