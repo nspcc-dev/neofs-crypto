@@ -94,6 +94,24 @@ func TestMarshalUnmarshal(t *testing.T) {
 		require.Equal(t, hex.EncodeToString(MarshalPublicKey(&privateKey.PublicKey)), walletPublicKey)
 		require.Equal(t, data, MarshalPrivateKey(privateKey))
 	})
+
+	t.Run("marshal / unmarshal public key with 31 byte X point", func(t *testing.T) {
+		privateKeyString := "4dd8baa41612a74c1cc664102330115f9b3f4d0fc9b7e4f95c4aceb5cbf335d6"
+
+		privateKeyHex, err := hex.DecodeString(privateKeyString)
+		require.NoError(t, err)
+
+		privateKey, err := UnmarshalPrivateKey(privateKeyHex)
+		require.NoError(t, err)
+		require.Len(t, privateKey.PublicKey.X.Bytes(), 31)
+
+		publicKeyHex := MarshalPublicKey(&privateKey.PublicKey)
+		require.Len(t, publicKeyHex, PublicKeyCompressedSize)
+
+		publicKey := UnmarshalPublicKey(publicKeyHex)
+		require.NotNil(t, publicKey)
+		require.Equal(t, *publicKey, privateKey.PublicKey)
+	})
 }
 
 func TestSignVerify(t *testing.T) {

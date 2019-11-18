@@ -103,7 +103,8 @@ func decompressPoints(x *big.Int, yBit uint) (*big.Int, *big.Int) {
 
 func encodePoint(x, y *big.Int) []byte {
 	data := make([]byte, PublicKeyCompressedSize)
-	copy(data[1:], x.Bytes())
+	i := PublicKeyCompressedSize - len(x.Bytes())
+	copy(data[i:], x.Bytes())
 
 	if y.Bit(0) == 0x1 {
 		data[0] = 0x3
