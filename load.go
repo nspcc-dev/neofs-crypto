@@ -8,6 +8,10 @@ import (
 	"github.com/pkg/errors"
 )
 
+// LoadPrivateKey allows to load private key from various formats:
+// - wif string
+// - hex string
+// - file path (D-bytes or SEC 1 / ASN.1 DER form)
 func LoadPrivateKey(val string) (*ecdsa.PrivateKey, error) {
 	if data, err := ioutil.ReadFile(val); err == nil {
 		return UnmarshalPrivateKey(data)
