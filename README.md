@@ -60,3 +60,16 @@ wif, err := crypto.WIFEncode(sk)
 // if something went wrong, returns error:
 skFromWIF, err := crypto.WIFDecode(wif)
 ```
+
+### LoadPrivateKey
+
+```
+// Load private key from wif format
+sk, err := crypto.LoadPrivateKey(wif_string)
+
+// Load private key from hex string
+sk, err := crypto.LoadPrivateKey(hex_string)
+
+// Load private key from file
+sk, err := crypto.LoadPrivateKey(file_path)
+```
