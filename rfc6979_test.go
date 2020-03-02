@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"testing"
 
+	"github.com/nspcc-dev/neofs-crypto/test"
 	"github.com/stretchr/testify/require"
 )
 
@@ -81,5 +82,25 @@ func TestRFC6979(t *testing.T) {
 
 			offset += RFC6979SignatureSize
 		}
+	}
+}
+
+func TestRFC6979_ShortDecodePoints(t *testing.T) {
+	key := test.DecodeKey(1)
+
+	msgs := []string{
+		"6341922933e156ea5a53b8ea3fa4a80c", // this msg has 31 byte `s` point
+		"61b863d81f72e0e0d0353b1cb90d62ce", // this msg has 31 byte 'r' point
+	}
+
+	for i := range msgs {
+		msg, err := hex.DecodeString(msgs[i])
+		require.NoError(t, err)
+
+		signature, err := SignRFC6979(key, msg)
+		require.NoError(t, err, msgs[i])
+
+		err = VerifyRFC6979(&key.PublicKey, msg, signature)
+		require.NoError(t, err, msgs[i])
 	}
 }

@@ -38,7 +38,18 @@ func SignRFC6979(key *ecdsa.PrivateKey, msg []byte) ([]byte, error) {
 		return nil, ErrEmptyPrivateKey
 	}
 	r, s := rfc6979.SignECDSA(key, hashBytesRFC6979(msg), sha256.New)
-	return append(r.Bytes(), s.Bytes()...), nil
+	rBytes, sBytes := r.Bytes(), s.Bytes()
+	signature := make([]byte, RFC6979SignatureSize)
+
+	// if `r` has less than 32 bytes, add leading zeros
+	ind := RFC6979SignatureSize/2 - len(rBytes)
+	copy(signature[ind:], rBytes)
+
+	// if `s` has less than 32 bytes, add leading zeros
+	ind = RFC6979SignatureSize - len(sBytes)
+	copy(signature[ind:], sBytes)
+
+	return signature, nil
 }
 
 func decodeSignature(sig []byte) (*big.Int, *big.Int, error) {
