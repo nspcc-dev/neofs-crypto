@@ -40,12 +40,12 @@ err := crypto.Verify(&sk.PublicKey, signature, message)
 ### RFC6979 Sign / Verify bytes using PK / SK
 
 ```
-// Sign returns signature (slice of 65 bytes) of SK for passed message (slice of bytes),
+// Sign returns signature (slice of 64 bytes) of SK for passed message (slice of bytes),
 // or error, if something went wrong:
 signature, err := crypto.SignRFC6979(sk, message)
 
 // Verify returns error message if PK is empty or
-// passed wrong signature (slice of 65 bytes) for message (slice of bytes),
+// passed wrong signature (slice of 64 bytes) for message (slice of bytes),
 err := crypto.VerifyRFC6979(&sk.PublicKey, signature, message)  
 ```
 
