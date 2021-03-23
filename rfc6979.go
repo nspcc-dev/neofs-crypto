@@ -34,10 +34,16 @@ func hashBytesRFC6979(data []byte) []byte {
 // Note that FIPS 186-3 section 4.6 specifies that the hash should be truncated
 // to the byte-length of the subgroup. This function does not perform that.
 func SignRFC6979(key *ecdsa.PrivateKey, msg []byte) ([]byte, error) {
+	return SignRFC6979Hash(key, hashBytesRFC6979(msg))
+}
+
+// SignRFC6979Hash signs sha256 hash of the message using the private key.
+func SignRFC6979Hash(key *ecdsa.PrivateKey, msgHash []byte) ([]byte, error) {
 	if key == nil {
 		return nil, ErrEmptyPrivateKey
 	}
-	r, s := rfc6979.SignECDSA(key, hashBytesRFC6979(msg), sha256.New)
+
+	r, s := rfc6979.SignECDSA(key, msgHash, sha256.New)
 	rBytes, sBytes := r.Bytes(), s.Bytes()
 	signature := make([]byte, RFC6979SignatureSize)
 
@@ -68,6 +74,20 @@ func VerifyRFC6979(key *ecdsa.PublicKey, msg, sig []byte) error {
 	} else if r, s, err := decodeSignature(sig); err != nil {
 		return err
 	} else if !ecdsa.Verify(key, hashBytesRFC6979(msg), r, s) {
+		return ErrWrongSignature
+	}
+
+	return nil
+}
+
+// VerifyRFC6979 verifies the signature of msg using the public key. It
+// return nil only if signature is valid.
+func VerifyRFC6979Hash(key *ecdsa.PublicKey, msgHash, sig []byte) error {
+	if key == nil {
+		return ErrEmptyPublicKey
+	} else if r, s, err := decodeSignature(sig); err != nil {
+		return err
+	} else if !ecdsa.Verify(key, msgHash, r, s) {
 		return ErrWrongSignature
 	}
 
