@@ -4,6 +4,7 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
+	"crypto/sha512"
 	"crypto/x509"
 	"encoding/hex"
 	"math/big"
@@ -123,6 +124,17 @@ func TestSignVerify(t *testing.T) {
 				UnmarshalPublicKey(sign)
 			}
 		})
+	})
+
+	t.Run("using prepared hash", func(t *testing.T) {
+		var (
+			data = []byte("Hello world")
+			sum = sha512.Sum512(data)
+			key  = test.DecodeKey(0)
+		)
+		sig, err := SignHash(key, sum[:])
+		require.NoError(t, err)
+		require.NoError(t, VerifyHash(&key.PublicKey, sum[:], sig))
 	})
 
 	t.Run("low level", func(t *testing.T) {

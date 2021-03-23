@@ -124,11 +124,17 @@ func hashBytes(data []byte) []byte {
 // Verify verifies the signature of msg using the public key pub. It returns
 // nil only if signature is valid.
 func Verify(pub *ecdsa.PublicKey, msg, sig []byte) error {
-	if r, s := unmarshalXY(sig); r == nil || s == nil {
-		return ErrCannotUnmarshal
-	} else if pub == nil {
+	return VerifyHash(pub, hashBytes(msg), sig)
+}
+
+// VerifyHash verifies the signature of msg using it's hash the public key pub.
+// It returns nil only if signature is valid.
+func VerifyHash(pub *ecdsa.PublicKey, msgHash, sig []byte) error {
+	if pub == nil {
 		return ErrEmptyPublicKey
-	} else if !ecdsa.Verify(pub, hashBytes(msg), r, s) {
+	} else if r, s := unmarshalXY(sig); r == nil || s == nil {
+		return ErrCannotUnmarshal
+	} else if !ecdsa.Verify(pub, msgHash, r, s) {
 		return errors.Wrapf(ErrInvalidSignature, "%0x : %0x", r, s)
 	}
 
@@ -140,7 +146,12 @@ func Verify(pub *ecdsa.PublicKey, msg, sig []byte) error {
 // will be truncated to that length. It returns the signature as slice bytes.
 // The security of the private key depends on the entropy of rand.
 func Sign(key *ecdsa.PrivateKey, msg []byte) ([]byte, error) {
-	x, y, err := ecdsa.Sign(rand.Reader, key, hashBytes(msg))
+	return SignHash(key, hashBytes(msg))
+}
+
+// SignHash signs message using it's hash and private key.
+func SignHash(key *ecdsa.PrivateKey, msgHash []byte) ([]byte, error) {
+	x, y, err := ecdsa.Sign(rand.Reader, key, msgHash)
 	if err != nil {
 		return nil, err
 	}
