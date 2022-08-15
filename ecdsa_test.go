@@ -129,7 +129,7 @@ func TestSignVerify(t *testing.T) {
 	t.Run("using prepared hash", func(t *testing.T) {
 		var (
 			data = []byte("Hello world")
-			sum = sha512.Sum512(data)
+			sum  = sha512.Sum512(data)
 			key  = test.DecodeKey(0)
 		)
 		sig, err := SignHash(key, sum[:])
