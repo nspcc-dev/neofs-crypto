@@ -3,11 +3,11 @@ package crypto
 import (
 	"crypto/ecdsa"
 	"crypto/sha256"
+	"fmt"
 	"math/big"
 
 	"github.com/nspcc-dev/neofs-crypto/internal"
 	"github.com/nspcc-dev/rfc6979"
-	"github.com/pkg/errors"
 )
 
 const (
@@ -60,7 +60,8 @@ func SignRFC6979Hash(key *ecdsa.PrivateKey, msgHash []byte) ([]byte, error) {
 
 func decodeSignature(sig []byte) (*big.Int, *big.Int, error) {
 	if ln := len(sig); ln != RFC6979SignatureSize {
-		return nil, nil, errors.Wrapf(ErrWrongHashSize, "actual=%d, expect=%d", ln, RFC6979SignatureSize)
+		return nil, nil, fmt.Errorf("%w: actual=%d, expect=%d",
+			ErrWrongHashSize, ln, RFC6979SignatureSize)
 	}
 
 	return new(big.Int).SetBytes(sig[:32]), new(big.Int).SetBytes(sig[32:]), nil

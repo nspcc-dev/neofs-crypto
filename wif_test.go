@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/nspcc-dev/neofs-crypto/test"
-	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 )
 
@@ -82,7 +81,7 @@ func TestWIF(t *testing.T) {
 					require.NoError(t, err)
 					require.Equal(t, current.WIF, actual)
 				default:
-					require.EqualError(t, errors.Cause(err), current.Error.Error())
+					require.ErrorIs(t, err, current.Error)
 				}
 			})
 		}
@@ -136,7 +135,7 @@ func TestWIF(t *testing.T) {
 					require.NoError(t, err)
 					require.Equal(t, current.Key, actual)
 				default:
-					require.EqualError(t, errors.Cause(err), current.Error.Error())
+					require.ErrorIs(t, err, current.Error)
 				}
 			})
 		}

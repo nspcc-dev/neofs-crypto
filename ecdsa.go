@@ -6,10 +6,10 @@ import (
 	"crypto/rand"
 	"crypto/sha512"
 	"crypto/x509"
+	"fmt"
 	"math/big"
 
 	"github.com/nspcc-dev/neofs-crypto/internal"
-	"github.com/pkg/errors"
 )
 
 const (
@@ -166,7 +166,7 @@ func VerifyHash(pub *ecdsa.PublicKey, msgHash, sig []byte) error {
 	} else if r, s := unmarshalXY(sig); r == nil || s == nil {
 		return ErrCannotUnmarshal
 	} else if !ecdsa.Verify(pub, msgHash, r, s) {
-		return errors.Wrapf(ErrInvalidSignature, "%0x : %0x", r, s)
+		return fmt.Errorf("%w: %0x : %0x", ErrInvalidSignature, r, s)
 	}
 
 	return nil

@@ -3,9 +3,8 @@ package crypto
 import (
 	"crypto/ecdsa"
 	"encoding/hex"
+	"fmt"
 	"os"
-
-	"github.com/pkg/errors"
 )
 
 // LoadPrivateKey allows to load private key from various formats:
@@ -21,5 +20,5 @@ func LoadPrivateKey(val string) (*ecdsa.PrivateKey, error) {
 		return key, nil
 	}
 
-	return nil, errors.Errorf("unknown key format (%q), expect: hex-string, wif or file-path", val)
+	return nil, fmt.Errorf("unknown key format (%q), expect: hex-string, wif or file-path", val)
 }
