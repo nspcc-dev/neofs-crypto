@@ -39,9 +39,18 @@ const (
 // P256 is base elliptic curve.
 var curve = elliptic.P256()
 
-// Marshal converts a points into the uncompressed form specified in section 4.3.6 of ANSI X9.62.
-func marshalXY(x, y *big.Int) []byte {
-	return elliptic.Marshal(curve, x, y)
+// marshalXY converts points into the uncompressed form specified in section 4.3.6 of ANSI X9.62.
+// It is also used to marshal signature, for backwards compatibility.
+func marshalXY(curve elliptic.Curve, x, y *big.Int) []byte {
+	params := curve.Params()
+	curveOrderByteSize := params.P.BitLen() / 8
+	buf := make([]byte, 1+curveOrderByteSize*2)
+	// r and s are not on curve at all, leave for backwards compatibility
+	buf[0] = 4
+	_ = x.FillBytes(buf[1 : 1+curveOrderByteSize])
+	_ = y.FillBytes(buf[1+curveOrderByteSize:])
+
+	return buf
 }
 
 // unmarshalXY converts a point, serialized by Marshal, into an x, y pair.
@@ -156,5 +165,5 @@ func SignHash(key *ecdsa.PrivateKey, msgHash []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	return marshalXY(x, y), nil
+	return marshalXY(key.Curve, x, y), nil
 }
