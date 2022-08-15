@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"crypto/ecdsa"
 	"crypto/sha256"
+	"fmt"
 
 	"github.com/mr-tron/base58"
 	"github.com/nspcc-dev/neofs-crypto/internal"
-	"github.com/pkg/errors"
 )
 
 const (
@@ -51,9 +51,9 @@ func WIFEncode(key *ecdsa.PrivateKey) (string, error) {
 func WIFDecode(wif string) (*ecdsa.PrivateKey, error) {
 	data, err := base58.Decode(wif)
 	if err != nil {
-		return nil, errors.Wrap(ErrBadWIF, err.Error())
+		return nil, fmt.Errorf("%w: %v", ErrBadWIF, err)
 	} else if actual := len(data); actual != WIFLength {
-		return nil, errors.Wrapf(ErrBadWIF, "expect: %d, actual: %d", WIFLength, actual)
+		return nil, fmt.Errorf("%w: expect: %d, actual: %d", ErrBadWIF, WIFLength, actual)
 	} else if sum := wifCheckSum(data[:34]); !bytes.Equal(data[34:], sum) {
 		return nil, ErrBadChecksum
 	}

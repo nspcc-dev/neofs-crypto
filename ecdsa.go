@@ -6,10 +6,10 @@ import (
 	"crypto/rand"
 	"crypto/sha512"
 	"crypto/x509"
+	"fmt"
 	"math/big"
 
 	"github.com/nspcc-dev/neofs-crypto/internal"
-	"github.com/pkg/errors"
 )
 
 const (
@@ -39,9 +39,18 @@ const (
 // P256 is base elliptic curve.
 var curve = elliptic.P256()
 
-// Marshal converts a points into the uncompressed form specified in section 4.3.6 of ANSI X9.62.
-func marshalXY(x, y *big.Int) []byte {
-	return elliptic.Marshal(curve, x, y)
+// marshalXY converts points into the uncompressed form specified in section 4.3.6 of ANSI X9.62.
+// It is also used to marshal signature, for backwards compatibility.
+func marshalXY(curve elliptic.Curve, x, y *big.Int) []byte {
+	params := curve.Params()
+	curveOrderByteSize := params.P.BitLen() / 8
+	buf := make([]byte, 1+curveOrderByteSize*2)
+	// r and s are not on curve at all, leave for backwards compatibility
+	buf[0] = 4
+	_ = x.FillBytes(buf[1 : 1+curveOrderByteSize])
+	_ = y.FillBytes(buf[1+curveOrderByteSize:])
+
+	return buf
 }
 
 // unmarshalXY converts a point, serialized by Marshal, into an x, y pair.
@@ -76,7 +85,7 @@ func MarshalPublicKey(key *ecdsa.PublicKey) []byte {
 		return nil
 	}
 
-	return encodePoint(key.X, key.Y)
+	return elliptic.MarshalCompressed(curve, key.X, key.Y)
 }
 
 // UnmarshalPublicKey from bytes.
@@ -90,6 +99,28 @@ func UnmarshalPublicKey(data []byte) *ecdsa.PublicKey {
 	}
 
 	return nil
+}
+
+func decodePoint(data []byte) (x *big.Int, y *big.Int) {
+	// empty data
+	if len(data) == 0 {
+		return
+	}
+
+	// tries to unmarshal compressed form
+	// returns (nil, nil) when:
+	// - wrong len(data)
+	// - data[0] != 2 && data[0] != 3
+	if x, y = elliptic.UnmarshalCompressed(curve, data); x != nil && y != nil {
+		return x, y
+	}
+
+	// tries to unmarshal uncompressed form and check that points on curve
+	if x, y = unmarshalXY(data); x == nil || y == nil || !curve.IsOnCurve(x, y) {
+		x, y = nil, nil
+	}
+
+	return x, y
 }
 
 // UnmarshalPrivateKey from bytes.
@@ -135,7 +166,7 @@ func VerifyHash(pub *ecdsa.PublicKey, msgHash, sig []byte) error {
 	} else if r, s := unmarshalXY(sig); r == nil || s == nil {
 		return ErrCannotUnmarshal
 	} else if !ecdsa.Verify(pub, msgHash, r, s) {
-		return errors.Wrapf(ErrInvalidSignature, "%0x : %0x", r, s)
+		return fmt.Errorf("%w: %0x : %0x", ErrInvalidSignature, r, s)
 	}
 
 	return nil
@@ -156,5 +187,5 @@ func SignHash(key *ecdsa.PrivateKey, msgHash []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	return marshalXY(x, y), nil
+	return marshalXY(key.Curve, x, y), nil
 }

@@ -115,12 +115,12 @@ func TestSignVerify(t *testing.T) {
 				r1, s1, err := ecdsa.Sign(rand.Reader, key, hashBytes(data))
 				require.NoError(t, err)
 
-				sign := marshalXY(r1, s1)
+				sign := marshalXY(key.Curve, r1, s1)
 				UnmarshalPublicKey(sign)
 			}
 
 			{ // 3. bad big.Ints
-				sign := marshalXY(big.NewInt(0), big.NewInt(1))
+				sign := marshalXY(elliptic.P256(), big.NewInt(0), big.NewInt(1))
 				UnmarshalPublicKey(sign)
 			}
 		})
@@ -129,7 +129,7 @@ func TestSignVerify(t *testing.T) {
 	t.Run("using prepared hash", func(t *testing.T) {
 		var (
 			data = []byte("Hello world")
-			sum = sha512.Sum512(data)
+			sum  = sha512.Sum512(data)
 			key  = test.DecodeKey(0)
 		)
 		sig, err := SignHash(key, sum[:])
@@ -148,7 +148,7 @@ func TestSignVerify(t *testing.T) {
 			hashBytes(data))
 		require.NoError(t, err)
 
-		sign := marshalXY(r1, s1)
+		sign := marshalXY(key.Curve, r1, s1)
 
 		{ // This is just to validate, that we are on right way.. try to unmarshal R/S from sign
 			// validate bytes length
