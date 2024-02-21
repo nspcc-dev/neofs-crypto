@@ -51,7 +51,7 @@ func WIFEncode(key *ecdsa.PrivateKey) (string, error) {
 func WIFDecode(wif string) (*ecdsa.PrivateKey, error) {
 	data, err := base58.Decode(wif)
 	if err != nil {
-		return nil, fmt.Errorf("%w: %v", ErrBadWIF, err)
+		return nil, fmt.Errorf("%w: %w", ErrBadWIF, err)
 	} else if actual := len(data); actual != WIFLength {
 		return nil, fmt.Errorf("%w: expect: %d, actual: %d", ErrBadWIF, WIFLength, actual)
 	} else if sum := wifCheckSum(data[:34]); !bytes.Equal(data[34:], sum) {
