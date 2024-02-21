@@ -32,7 +32,6 @@ const (
 
 	// PublicKeyUncompressedSize is constant with uncompressed size of public key (PK).
 	// First byte always should be 0x4 other 64 bytes is X and Y (32 bytes per coordinate).
-	// 2 * 32 + 1
 	PublicKeyUncompressedSize = 65
 )
 

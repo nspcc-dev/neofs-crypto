@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	// RFC6979SignatureSize contains r and s coordinates (32 bytes)
+	// RFC6979SignatureSize contains r and s coordinates (32 bytes).
 	RFC6979SignatureSize = 64
 
 	// ErrWrongHashSize when passed signature to VerifyRFC6979 has wrong size.

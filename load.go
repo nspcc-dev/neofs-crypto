@@ -8,9 +8,9 @@ import (
 )
 
 // LoadPrivateKey allows to load private key from various formats:
-// - wif string
-// - hex string
-// - file path (D-bytes or SEC 1 / ASN.1 DER form)
+//   - wif string
+//   - hex string
+//   - file path (D-bytes or SEC 1 / ASN.1 DER form).
 func LoadPrivateKey(val string) (*ecdsa.PrivateKey, error) {
 	if data, err := os.ReadFile(val); err == nil {
 		return UnmarshalPrivateKey(data)
