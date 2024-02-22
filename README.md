@@ -1,6 +1,14 @@
 # NeoFS Crypto library
 
-**This package contains useful methods to work with crypto-primitives, that used in NeoFS / NeoBlockchain.**
+**¡Atención! This library is deprecated and no longer supported.**
+
+For WIF, key management and RFC6979 signatures please refer to
+[github.com/nspcc-dev/neo-go/pkg/crypto/keys](https://pkg.go.dev/github.com/nspcc-dev/neo-go/pkg/crypto/keys)
+and [github.com/nspcc-dev/rfc6979](https://pkg.go.dev/github.com/nspcc-dev/rfc6979).
+For NeoFS-specific signatures with SHA-512 hashes use
+[github.com/nspcc-dev/neofs-sdk-go/crypto/ecdsa](https://pkg.go.dev/github.com/nspcc-dev/neofs-sdk-go/crypto/ecdsa).
+
+This package contained useful methods to work with crypto-primitives used in NeoFS/Neo.
 
 ## Examples
 
